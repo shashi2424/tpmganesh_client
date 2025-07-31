@@ -1,4 +1,6 @@
 [build]
   command = "npm install --legacy-peer-deps && npm run build"
-  publish = "build"
+  publish = "build"  # or dist for Vite
 
+[build.environment]
+  NODE_VERSION = "18"

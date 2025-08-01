@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Box, Typography, Grid, Card, CardMedia, IconButton, Dialog, DialogContent, useTheme, useMediaQuery } from '@mui/material';
 import { Close, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import Slider from 'react-slick';
-import "slick-carousel/slick-carousel.css";
-import "slick-carousel/slick-theme.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 
 const FestivalGallery = ({ gallery, onImageClick }) => {
   const [open, setOpen] = useState(false);

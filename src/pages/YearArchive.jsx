@@ -5,7 +5,9 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import SwipeableViews from 'react-swipeable-views';
+import Slider from 'react-slick';
+import "slick-carousel/slick-carousel.css";
+import "slick-carousel/slick-theme.css";
 import { useParams } from 'react-router-dom';
 import FestivalGallery from '../components/FestivalGallery';
 import LadduWinner from '../components/LadduWinner';
@@ -18,6 +20,26 @@ import {
   Paper, 
   Box
 } from '@mui/material';
+
+// Custom styles for react-slick
+const sliderSettings = {
+  dots: false,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  swipe: true,
+  arrows: false,
+  responsive: [
+    {
+      breakpoint: 600,
+      settings: {
+        dots: false,
+        arrows: false
+      }
+    }
+  ]
+};
 
 const YearArchive = ({ year: propYear }) => {
   const params = useParams();
@@ -241,10 +263,10 @@ const YearArchive = ({ year: propYear }) => {
               <NavigateNextIcon fontSize="large" />
             </IconButton>
           )}
-          <SwipeableViews
-            index={initialMediaIndex}
-            onChangeIndex={setInitialMediaIndex}
-            enableMouseEvents
+          <Slider
+            {...sliderSettings}
+            initialSlide={initialMediaIndex}
+            afterChange={setInitialMediaIndex}
             style={{ width: '100%', minHeight: 400 }}
           >
             {allMediaItems.map((media, idx) => (
@@ -253,18 +275,30 @@ const YearArchive = ({ year: propYear }) => {
                   <img
                     src={media.url}
                     alt={media.alt || ''}
-                    style={{ maxWidth: '90vw', maxHeight: '80vh', borderRadius: 8, boxShadow: '0 4px 32px rgba(0,0,0,0.5)' }}
+                    style={{ 
+                      maxWidth: '90vw', 
+                      maxHeight: '80vh', 
+                      borderRadius: 8, 
+                      boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
+                      margin: '0 auto'  // Center the image
+                    }}
                   />
                 ) : (
                   <video
                     src={media.url}
                     controls
-                    style={{ maxWidth: '90vw', maxHeight: '80vh', borderRadius: 8, background: '#000' }}
+                    style={{ 
+                      maxWidth: '90vw', 
+                      maxHeight: '80vh', 
+                      borderRadius: 8, 
+                      background: '#000',
+                      margin: '0 auto'  // Center the video
+                    }}
                   />
                 )}
               </Box>
             ))}
-          </SwipeableViews>
+          </Slider>
         </DialogContent>
       </Dialog>
     </Container>

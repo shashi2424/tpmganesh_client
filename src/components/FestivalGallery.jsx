@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Typography, Grid, Card, CardMedia, IconButton, Dialog, DialogContent, useTheme, useMediaQuery } from '@mui/material';
 import { Close, NavigateBefore, NavigateNext } from '@mui/icons-material';
-import SwipeableViews from 'react-swipeable-views';
+import Slider from 'react-slick';
+import "slick-carousel/slick-carousel.css";
+import "slick-carousel/slick-theme.css";
 
 const FestivalGallery = ({ gallery, onImageClick }) => {
   const [open, setOpen] = useState(false);
@@ -9,7 +11,31 @@ const FestivalGallery = ({ gallery, onImageClick }) => {
   const [viewAllOpen, setViewAllOpen] = useState(false);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-  // For swipeable views, track if animating for pointer events
+
+  const sliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    swipe: true,
+    arrows: true, // Hidden but used for programmatic navigation
+    beforeChange: () => setIsAnimating(true),
+    afterChange: (current) => {
+      setActiveStep(current);
+      setIsAnimating(false);
+    },
+    cssEase: 'ease-out',
+    useCSS: true,
+    useTransform: true,
+    adaptiveHeight: true,
+    className: 'gallery-slider',
+    // Hide default arrows but keep them functional
+    prevArrow: <button type="button" className="slick-prev" style={{ display: 'none' }} />,
+    nextArrow: <button type="button" className="slick-next" style={{ display: 'none' }} />
+  };
+
+  // For tracking animation state
   const [isAnimating, setIsAnimating] = useState(false);
 
   React.useEffect(() => {
@@ -34,19 +60,7 @@ const FestivalGallery = ({ gallery, onImageClick }) => {
     setOpen(false);
   };
 
-  const handleNext = (e) => {
-    if (e) e.stopPropagation();
-    setActiveStep((prev) => (prev + 1) % gallery.length);
-  };
-
-  const handleBack = (e) => {
-    if (e) e.stopPropagation();
-    setActiveStep((prev) => (prev - 1 + gallery.length) % gallery.length);
-  };
-
-  const handleStepChange = (step) => {
-    setActiveStep(step);
-  };
+  // Navigation is now handled by Slider component
 
   // If gallery is not an array or is empty, show a message
   if (!Array.isArray(gallery) || gallery.length === 0) {
@@ -220,7 +234,10 @@ const FestivalGallery = ({ gallery, onImageClick }) => {
           {gallery.length > 1 && (
             <IconButton
               aria-label="previous"
-              onClick={() => setActiveStep((activeStep - 1 + gallery.length) % gallery.length)}
+              onClick={(e) => {
+                e.stopPropagation();
+                document.querySelector('.slick-prev').click();
+              }}
               sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: '#fff', zIndex: 2 }}
             >
               <NavigateBefore fontSize="large" />
@@ -229,58 +246,66 @@ const FestivalGallery = ({ gallery, onImageClick }) => {
           {gallery.length > 1 && (
             <IconButton
               aria-label="next"
-              onClick={() => setActiveStep((activeStep + 1) % gallery.length)}
+              onClick={(e) => {
+                e.stopPropagation();
+                document.querySelector('.slick-next').click();
+              }}
               sx={{ position: 'absolute', right: 48, top: '50%', transform: 'translateY(-50%)', color: '#fff', zIndex: 2 }}
             >
               <NavigateNext fontSize="large" />
             </IconButton>
           )}
-          <SwipeableViews
-            index={activeStep}
-            onChangeIndex={setActiveStep}
-            enableMouseEvents
-            animateTransitions
-            resistance
-            axis={fullScreen ? 'x' : 'x'}
-            onSwitching={(index, type) => setIsAnimating(type === 'move')}
-            style={{ width: '100%', minHeight: fullScreen ? '100vh' : 400 }}
-          >
-            {gallery.map((media, idx) => (
-              <Box key={idx} sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: fullScreen ? '100vh' : 400 }}>
-                {media.type === 'image' ? (
-                  <img
-                    src={media.url}
-                    alt={media.alt || ''}
-                    style={{
-                      maxWidth: fullScreen ? '98vw' : '90vw',
-                      maxHeight: fullScreen ? '90vh' : '80vh',
-                      borderRadius: 8,
-                      boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
-                      pointerEvents: isAnimating ? 'none' : 'auto',
-                      userSelect: 'none',
-                      touchAction: 'pan-y'
-                    }}
-                    draggable={false}
-                  />
-                ) : (
-                  <video
-                    src={media.url}
-                    controls
-                    style={{
-                      maxWidth: fullScreen ? '98vw' : '90vw',
-                      maxHeight: fullScreen ? '90vh' : '80vh',
-                      borderRadius: 8,
-                      background: '#000',
-                      pointerEvents: isAnimating ? 'none' : 'auto',
-                      userSelect: 'none',
-                      touchAction: 'pan-y'
-                    }}
-                    draggable={false}
-                  />
-                )}
-              </Box>
-            ))}
-          </SwipeableViews>
+          <Box sx={{ width: '100%', minHeight: fullScreen ? '100vh' : 400 }}>
+            <Slider
+              {...sliderSettings}
+              initialSlide={activeStep}
+            >
+              {gallery.map((media, idx) => (
+                <Box key={idx} sx={{ 
+                  width: '100%', 
+                  display: 'flex !important', // Override Slick's inline styles
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  minHeight: fullScreen ? '100vh' : 400,
+                  outline: 'none' // Remove focus outline
+                }}>
+                  {media.type === 'image' ? (
+                    <img
+                      src={media.url}
+                      alt={media.alt || ''}
+                      style={{
+                        maxWidth: fullScreen ? '98vw' : '90vw',
+                        maxHeight: fullScreen ? '90vh' : '80vh',
+                        borderRadius: 8,
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
+                        pointerEvents: isAnimating ? 'none' : 'auto',
+                        userSelect: 'none',
+                        margin: '0 auto', // Center the image
+                        display: 'block' // Remove extra space
+                      }}
+                      draggable={false}
+                    />
+                  ) : (
+                    <video
+                      src={media.url}
+                      controls
+                      style={{
+                        maxWidth: fullScreen ? '98vw' : '90vw',
+                        maxHeight: fullScreen ? '90vh' : '80vh',
+                        borderRadius: 8,
+                        background: '#000',
+                        pointerEvents: isAnimating ? 'none' : 'auto',
+                        userSelect: 'none',
+                        margin: '0 auto', // Center the video
+                        display: 'block' // Remove extra space
+                      }}
+                      draggable={false}
+                    />
+                  )}
+                </Box>
+              ))}
+            </Slider>
+          </Box>
         </DialogContent>
       </Dialog>
     </Box>

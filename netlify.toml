@@ -1,6 +1,7 @@
 [build]
   command = "npm install --force && npm run build"
-  publish = "build"  # or dist for Vite
+  publish = "build"
 
 [build.environment]
-  NODE_VERSION = "19"
+  NODE_VERSION = "20.17.0"
+  NPM_VERSION = "11.4.2"
